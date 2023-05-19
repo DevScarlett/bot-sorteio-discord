@@ -4,6 +4,9 @@ const token = 'TOKEN DO BOT';
 const serverID = 'ID SERVER';
 const canalID = 'ID CANAL';
 const roleID = 'ID CARGO';
+const fs = require('fs');
+const champsFile = 'champsFile.json';
+let arrayVencedorParaSave = [];
 
 client.on('ready', () => {
   console.log(`Bot está online e pronto para funfar!`);
@@ -58,12 +61,42 @@ function iniciarSorteio() {
 
   const champ = participantes[Math.floor(Math.random() * participantes.length)];
 
+  //
+  const vencedorParaSave = { nome: champ, data: new Date() };
+  arrayVencedorParaSave.push(vencedorParaSave);
+
   const msgEmbed = new Discord.MessageEmbed()
   .setTitle('Resultado do Sorteio')
   .setDescription(`Parabéns, ${champ}! Você ganhou o sorteio! 🎉`)
   .setColor('#FF0000');
 
 canal.send(msgEmbed);
+saveChamps();
 }
+
+function saveChamps() {
+  const data = JSON.stringify(arrayVencedorParaSave, null, 2);
+
+  fs.writeFile(champsFile, data, (err) => {
+    if (err) {
+      console.error('Erro ao salvar', err);
+    } else {
+      console.log('Salvo com sucesso.');
+    }
+  });
+}
+
+fs.readFile(champsFile, (err, data) => {
+  if (err) {
+    console.error('Erro ao ler o arquivo', err);
+  } else {
+    try {
+      arrayVencedorParaSave = JSON.parse(data);
+      console.log('Carregado', arrayVencedorParaSave);
+    } catch (error) {
+      console.error('Erro ao fazer o parse do arquivo', error);
+    }
+  }
+});
 
 client.login(token);
